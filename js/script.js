@@ -14,6 +14,8 @@ document.addEventListener('click', function (e) {
     handleRetweetBtn(e.target.dataset.retweet);
   } else if (e.target.dataset.reply) {
     handleReplyBtn(e.target.dataset.reply);
+  } else if (e.target.dataset.replysend) {
+    handleReplySendBtn(e.target.dataset.replysend);
   }
 });
 // loadEventListeners();
@@ -25,11 +27,6 @@ function render() {
 
   tweetsData.forEach(function (tweet) {
     let repliesHtml = '';
-    let likedClass = '';
-    let retweetedClass = '';
-
-    if (tweet.isLiked) likedClass = 'liked';
-    if (tweet.isRetweeted) retweetedClass = 'retweeted';
 
     tweet.replies.forEach(function (reply) {
       repliesHtml += `
@@ -56,29 +53,18 @@ function render() {
 
                     <div class="tweet-details">
                     
-                        <span class="tweet-detail">
-                            <i class="fa-regular fa-comment-dots"
-                            data-reply="${tweet.uuid}"></i>
-                            ${tweet.replies.length}
-                        </span>
+                        ${renderReplyBtn(tweet)}
 
-                        <span class="tweet-detail">
-                            <i class="fa-solid fa-heart ${likedClass}"
-                            data-like="${tweet.uuid}"></i>
-                            ${tweet.likes}
-                        </span>
+                        ${renderLikeBtn(tweet)}
 
-                        <span class="tweet-detail">
-                            <i class="fa-solid fa-retweet ${retweetedClass}"
-                            data-retweet="${tweet.uuid}"></i>
-                            ${tweet.retweets}
-                        </span>
+                        ${renderRetweetBtn(tweet)}
                         
                     </div>   
                 </div>            
             </div>
             <div class="hidden" id="replies-${tweet.uuid}">
-                ${repliesHtml}
+
+                ${renderReplies(tweet)}
             </div>   
         </div>
         `;
@@ -87,6 +73,61 @@ function render() {
   document.getElementById('feed').innerHTML = tweetsHtml;
 }
 render();
+
+function renderReplies(tweet) {
+  let repliesHtml = `
+  <textarea id="reply-input-${tweet.uuid}" class="reply-input"></textarea>
+  <button class="reply-btn" data-replysend="${tweet.uuid}">Send</button>
+  `;
+
+  tweet.replies.forEach(function (reply) {
+    repliesHtml += `
+            <div class="tweet-reply">
+                <div class="tweet-inner">
+                    <img src="${reply.profilePic}" class="profile-pic">
+                        <div>
+                            <p class="handle">${reply.handle}</p>
+                            <p class="tweet-text">${reply.tweetText}</p>
+                        </div>
+                    </div>
+            </div>
+            `;
+  });
+
+  return repliesHtml;
+}
+
+function renderReplyBtn(tweet) {
+  return `<span class="tweet-detail" id="replies-btn-${tweet.uuid}">
+    <i class="fa-regular fa-comment-dots"
+    data-reply="${tweet.uuid}"></i>
+    ${tweet.replies.length}
+    </span>`;
+}
+
+function renderLikeBtn(tweet) {
+  let likedClass = '';
+  if (tweet.isLiked) likedClass = 'liked';
+
+  return `<span class="tweet-detail" id="like-btn-${tweet.uuid}">
+    <i class="fa-solid fa-heart ${likedClass}"
+    data-like="${tweet.uuid}"></i>
+    ${tweet.likes}
+    </span>
+    `;
+}
+
+function renderRetweetBtn(tweet) {
+  let retweetedClass = '';
+  if (tweet.isRetweeted) retweetedClass = 'retweeted';
+
+  return `<span class="tweet-detail" id="retweet-btn-${tweet.uuid}">
+    <i class="fa-solid fa-retweet ${retweetedClass}"
+    data-retweet="${tweet.uuid}"></i>
+    ${tweet.retweets}
+    </span>
+    `;
+}
 
 function handleLikeBtn(uuid) {
   const targetTweet = getTargetTweet(uuid);
@@ -97,7 +138,7 @@ function handleLikeBtn(uuid) {
     targetTweet.likes++;
   }
   targetTweet.isLiked = !targetTweet.isLiked;
-  render();
+  document.getElementById(`like-btn-${uuid}`).innerHTML = renderLikeBtn(targetTweet);
 }
 
 function handleRetweetBtn(uuid) {
@@ -109,13 +150,31 @@ function handleRetweetBtn(uuid) {
     targetTweet.retweets++;
   }
   targetTweet.isRetweeted = !targetTweet.isRetweeted;
-  render();
+
+  document.getElementById(`retweet-btn-${uuid}`).innerHTML = renderRetweetBtn(targetTweet);
 }
 
 function handleReplyBtn(uuid) {
-  //   const targetTweet = getTargetTweet(uuid);
-
   document.getElementById(`replies-${uuid}`).classList.toggle('hidden');
+}
+
+function handleReplySendBtn(uuid) {
+  const replyInput = document.getElementById(`reply-input-${uuid}`).value;
+  const targetTweet = getTargetTweet(uuid);
+
+  const reply = {
+    handle: `@Scrimba ✅`,
+    profilePic: `images/scrimbalogo.png`,
+    tweetText: replyInput,
+  };
+
+  if (replyInput) targetTweet.replies.unshift(reply);
+
+  //   console.log(document.getElementById(`replies-btn-${tweet.uuid}`).innerHTML);
+
+  document.getElementById(`replies-btn-${uuid}`).innerHTML = renderReplyBtn(targetTweet);
+
+  document.getElementById(`replies-${uuid}`).innerHTML = renderReplies(targetTweet);
 }
 
 function getTargetTweet(uuid) {
