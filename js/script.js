@@ -12,6 +12,8 @@ document.addEventListener('click', function (e) {
     handleLikeBtn(e.target.dataset.like);
   } else if (e.target.dataset.retweet) {
     handleRetweetBtn(e.target.dataset.retweet);
+  } else if (e.target.dataset.reply) {
+    handleReplyBtn(e.target.dataset.reply);
   }
 });
 // loadEventListeners();
@@ -19,16 +21,32 @@ document.addEventListener('click', function (e) {
 // Utility Functions
 // Functions
 function render() {
-  let feedHtml = '';
+  let tweetsHtml = '';
 
   tweetsData.forEach(function (tweet) {
+    let repliesHtml = '';
     let likedClass = '';
     let retweetedClass = '';
 
     if (tweet.isLiked) likedClass = 'liked';
     if (tweet.isRetweeted) retweetedClass = 'retweeted';
 
-    retweetedClass = feedHtml += `
+    console.log(repliesHtml);
+    tweet.replies.forEach(function (reply) {
+      repliesHtml += `
+          <div class="tweet-reply">
+              <div class="tweet-inner">
+                  <img src="${reply.profilePic}" class="profile-pic">
+                      <div>
+                          <p class="handle">${reply.handle}</p>
+                          <p class="tweet-text">${reply.tweetText}</p>
+                      </div>
+                  </div>
+          </div>
+          `;
+    });
+
+    tweetsHtml += `
         <div class="tweet">
             <div class="tweet-inner">
                 <img src="${tweet.profilePic}" class="profile-pic">
@@ -60,14 +78,14 @@ function render() {
                     </div>   
                 </div>            
             </div>
-            <div class="hidden" id="">
-                
+            <div class="hidden" id="replies-${tweet.uuid}">
+                ${repliesHtml}
             </div>   
         </div>
         `;
   });
 
-  document.getElementById('feed').innerHTML = feedHtml;
+  document.getElementById('feed').innerHTML = tweetsHtml;
 }
 render();
 
@@ -93,6 +111,12 @@ function handleRetweetBtn(uuid) {
   }
   targetTweet.isRetweeted = !targetTweet.isRetweeted;
   render();
+}
+
+function handleReplyBtn(uuid) {
+  //   const targetTweet = getTargetTweet(uuid);
+
+  document.getElementById(`replies-${uuid}`).classList.toggle('hidden');
 }
 
 function getTargetTweet(uuid) {
