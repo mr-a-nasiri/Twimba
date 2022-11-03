@@ -31,7 +31,6 @@ function render() {
     if (tweet.isLiked) likedClass = 'liked';
     if (tweet.isRetweeted) retweetedClass = 'retweeted';
 
-    console.log(repliesHtml);
     tweet.replies.forEach(function (reply) {
       repliesHtml += `
           <div class="tweet-reply">
