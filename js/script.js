@@ -2,6 +2,7 @@
 
 // Import Data
 import { tweetsData } from '/js/data.js';
+import { v4 as uuidv4 } from 'https://jspm.dev/uuid';
 
 // Elements & Input
 // Btn Elements
@@ -16,6 +17,8 @@ document.addEventListener('click', function (e) {
     handleReplyBtn(e.target.dataset.reply);
   } else if (e.target.dataset.replysend) {
     handleReplySendBtn(e.target.dataset.replysend);
+  } else if (e.target.id === 'tweet-btn') {
+    handTweedBtn();
   }
 });
 // loadEventListeners();
@@ -170,8 +173,6 @@ function handleReplySendBtn(uuid) {
 
   if (replyInput) targetTweet.replies.unshift(reply);
 
-  //   console.log(document.getElementById(`replies-btn-${tweet.uuid}`).innerHTML);
-
   document.getElementById(`replies-btn-${uuid}`).innerHTML = renderReplyBtn(targetTweet);
 
   document.getElementById(`replies-${uuid}`).innerHTML = renderReplies(targetTweet);
@@ -181,4 +182,23 @@ function getTargetTweet(uuid) {
   return tweetsData.filter(function (tweet) {
     return tweet.uuid === uuid;
   })[0];
+}
+
+function handTweedBtn() {
+  const tweetInput = document.getElementById(`tweet-input`).value;
+
+  const tweet = {
+    handle: `@Scrimba ✅`,
+    profilePic: `images/scrimbalogo.png`,
+    likes: 0,
+    retweets: 0,
+    tweetText: tweetInput,
+    replies: [],
+    isLiked: false,
+    isRetweeted: false,
+    uuid: uuidv4(),
+  };
+
+  if (tweetInput) tweetsData.unshift(tweet);
+  render();
 }
