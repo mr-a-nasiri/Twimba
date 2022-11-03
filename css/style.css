@@ -109,6 +109,15 @@ header {
   display: flex;
   align-items: flex-start;
   gap: 10px;
+  position: relative;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 0;
+  right: 0;
+  color: red;
+  cursor: pointer;
 }
 
 .tweet-details {
